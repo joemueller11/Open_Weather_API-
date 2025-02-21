@@ -1,4 +1,9 @@
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // TODO: Define a City class with name and id properties
 class City {
@@ -12,21 +17,30 @@ class City {
 // TODO: Complete the HistoryService class
 class HistoryService { 
   cities: City[] = [];
+private filePath: string;
+
+  constructor() {
+    this.filePath = path.join(__dirname, '../../../searchHistory.json');
+  }
 
   // TODO: Define a read method that reads from the searchHistory.json file
   private async read() {
     try {
-      const data = await fs.promises.readFile('searchHistory.json', 'utf-8');
-      return JSON.parse(data);
+        if (!fs.existsSync(this.filePath)) {
+            await fs.promises.writeFile(this.filePath, '[]');
+            return [];
+        }
+        const data = await fs.promises.readFile(this.filePath, 'utf-8');
+        return JSON.parse(data);
     } catch (error) {
-      console.error(error);
-      return [];
+        console.error(error);
+        return [];
     }
   }
   // TODO: Define a write method that writes the updated cities array to the searchHistory.json file
   private async write(cities: City[]) {
     try {
-      await fs.promises.writeFile('searchHistory.json', JSON.stringify(cities, null, 2));
+      await fs.promises.writeFile(this.filePath, JSON.stringify(cities, null, 2));
     } catch (error) {
       console.error(error);
     }
