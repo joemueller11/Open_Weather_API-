@@ -35,12 +35,15 @@ class WeatherService {
     this.cityName = cityName;
   }
   // TODO: Create fetchLocationData method
-  private async fetchLocationData(query: string): Promise<any> {
+  private async fetchLocationData(query: string): Promise<any[]> { 
     const response = await fetch(`${this.baseURL}/geo/1.0/direct?q=${query}&limit=1&appid=${this.APIKey}`);
-    if (!response.ok) throw new Error('Failed to fetch location data');
+    if (!response.ok) {
+        const errorText = await response.text(); 
+        throw new Error(`Failed to fetch location data: ${response.status} - ${errorText}`); 
+    }
     const data = await response.json();
     return data;
-  }
+}
   // TODO: Create destructureLocationData method
   private destructureLocationData(locationData: Coordinates): Coordinates {
     const { lat, lon } = locationData;
@@ -56,29 +59,26 @@ class WeatherService {
   }
   // TODO: Create fetchAndDestructureLocationData method
   private async fetchAndDestructureLocationData(): Promise<Coordinates> {
-    const response = await fetch(this.buildGeocodeQuery());
-    if (response.ok) {
-        const data = await response.json();
-        if (!data || data.length === 0) {
-            throw new Error('City not found');
-        }
-        let cityCoordinates: Coordinates = {
-            lat: data[0].lat,  // Access first item in array
-            lon: data[0].lon   // Access first item in array
-        }
-        return this.destructureLocationData(cityCoordinates);
+    const locationData = await this.fetchLocationData(this.cityName); // Use the improved fetchLocationData
+    if (!locationData || locationData.length === 0) {
+        throw new Error('City not found');
     }
-    throw new Error('Failed to fetch location data');
-  }
+    const cityCoordinates: Coordinates = {
+        lat: locationData[0].lat,
+        lon: locationData[0].lon
+    };
+    return cityCoordinates; 
+}
   // TODO: Create fetchWeatherData method
   private async fetchWeatherData(coordinates: Coordinates): Promise<any> {
     const response = await fetch(this.buildWeatherQuery(coordinates));
-    if (response.ok) {
-      const data = await response.json();
-      return data;
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch weather data: ${response.status} - ${errorText}`);
     }
-    throw new Error('Failed to fetch weather data');
-  }
+    const data = await response.json();
+    return data;
+}
   // TODO: Build parseCurrentWeather method
   private parseCurrentWeather(response: any) {
     let currentWeather = new Weather(

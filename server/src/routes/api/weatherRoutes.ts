@@ -14,8 +14,9 @@ router.post('/', async (req, res) => {
         const weatherData = await WeatherService.getWeatherData(cityname);
         await HistoryService.addCity(cityname);
         return res.json(weatherData);
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to get weather data' });
+      } catch (error) {
+        console.error("Error fetching weather data:", error); // Log the full error on the server
+        return res.status(500).json({ error: `Failed to get weather data: ${error.message}` }); // Send a more informative error to the client
     }
 });
 
