@@ -28,15 +28,15 @@ class WeatherService {
   constructor(
     baseURL: string = "https://api.openweathermap.org/data/3.0", 
     APIKey: string = "d2ce08e75ccc1746161bc125de6ce70f", 
-    cityName: string
+    cityName: string = ""
   ) {
     this.baseURL = baseURL;
     this.APIKey = APIKey;
     this.cityName = cityName;
   }
   // TODO: Create fetchLocationData method
-  private async fetchLocationData(query: string): Promise<any[]> { 
-    const response = await fetch(`${this.baseURL}/geo/1.0/direct?q=${query}&limit=1&appid=${this.APIKey}`);
+  private async fetchLocationData(): Promise<any[]> { 
+    const response = await fetch(this.buildGeocodeQuery());
     if (!response.ok) {
         const errorText = await response.text(); 
         throw new Error(`Failed to fetch location data: ${response.status} - ${errorText}`); 
@@ -51,7 +51,7 @@ class WeatherService {
   }
   // TODO: Create buildGeocodeQuery method
   private buildGeocodeQuery(): string {
-    return `http://api.openweathermap.org/geo/1.0/direct?q=${this.cityName}&limit=1&appid=${this.APIKey}`;
+    return `https://api.openweathermap.org/geo/1.0/direct?q=${this.cityName}&limit=1&appid=${this.APIKey}`;
   }
   // TODO: Create buildWeatherQuery method
   private buildWeatherQuery(coordinates: Coordinates): string {
@@ -59,15 +59,14 @@ class WeatherService {
   }
   // TODO: Create fetchAndDestructureLocationData method
   private async fetchAndDestructureLocationData(): Promise<Coordinates> {
-    const locationData = await this.fetchLocationData(this.cityName); // Use the improved fetchLocationData
+    const locationData = await this.fetchLocationData(); // Use the improved fetchLocationData
     if (!locationData || locationData.length === 0) {
         throw new Error('City not found');
     }
-    const cityCoordinates: Coordinates = {
-        lat: locationData[0].lat,
-        lon: locationData[0].lon
-    };
-    return cityCoordinates; 
+    return this.destructureLocationData({ 
+      lat: locationData[0].lat, 
+      lon: locationData[0].lon 
+  });
 }
   // TODO: Create fetchWeatherData method
   private async fetchWeatherData(coordinates: Coordinates): Promise<any> {

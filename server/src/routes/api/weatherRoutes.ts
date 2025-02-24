@@ -16,12 +16,13 @@ router.post('/', async (req, res) => {
         return res.json(weatherData);
       } catch (error) {
         console.error("Error fetching weather data:", error); // Log the full error on the server
-        return res.status(500).json({ error: `Failed to get weather data: ${error.message}` }); // Send a more informative error to the client
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        return res.status(500).json({ error: `Failed to get weather data: ${errorMessage}` }); // Send a more informative error to the client
     }
 });
 
 // TODO: GET search history
-router.get('/history', async (req, res) => {
+router.get('/history', async (_req,  res) => {
   res.json(await HistoryService.getCities());
 });
 
