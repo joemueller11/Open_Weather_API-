@@ -28,6 +28,9 @@ const humidityEl: HTMLParagraphElement = document.getElementById(
   'humidity'
 ) as HTMLParagraphElement;
 
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3001/api' 
+  : '/api';
 /*
 
 API Calls
@@ -35,7 +38,7 @@ API Calls
 */
 
 const fetchWeather = async (cityName: string) => {
-  const response = await fetch('/api/weather/', {
+  const response = await fetch(`${API_URL}/weather/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -52,7 +55,7 @@ const fetchWeather = async (cityName: string) => {
 };
 
 const fetchSearchHistory = async () => {
-  const history = await fetch('/api/weather/history', {
+  const history = await fetch(`${API_URL}/weather/history`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -62,7 +65,7 @@ const fetchSearchHistory = async () => {
 };
 
 const deleteCityFromHistory = async (id: string) => {
-  await fetch(`/api/weather/history/${id}`, {
+  await fetch(`${API_URL}/weather/history/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
