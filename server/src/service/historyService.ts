@@ -1,6 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+import fs from 'fs/promises';
+import { existsSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,23 +25,23 @@ private filePath: string;
   }
 
   // TODO: Define a read method that reads from the searchHistory.json file
-  private async read() {
+  async read(): Promise<City[]> {
     try {
-        if (!fs.existsSync(this.filePath)) {
-            await fs.promises.writeFile(this.filePath, '[]');
+        if (!existsSync(this.filePath)) {
+            await fs.writeFile(this.filePath, '[]');
             return [];
         }
-        const data = await fs.promises.readFile(this.filePath, 'utf-8');
+        const data = await fs.readFile(this.filePath, 'utf-8');
         return JSON.parse(data);
     } catch (error) {
         console.error(error);
         return [];
     }
-  }
+}
   // TODO: Define a write method that writes the updated cities array to the searchHistory.json file
   private async write(cities: City[]) {
     try {
-      await fs.promises.writeFile(this.filePath, JSON.stringify(cities, null, 2));
+      await fs.writeFile(this.filePath, JSON.stringify(cities, null, 2));
     } catch (error) {
       console.error(error);
     }
@@ -53,6 +54,7 @@ private filePath: string;
   // TODO Define an addCity method that adds a city to the searchHistory.json file
   async addCity(city: string) {
     const cities = await this.read();
+    // This should create a new city with unique ID and add it to cities array
     const newCity = new City(city, Date.now().toString());
     cities.push(newCity);
     await this.write(cities);
@@ -61,8 +63,8 @@ private filePath: string;
   // * BONUS TODO: Define a removeCity method that removes a city from the searchHistory.json file
   async removeCity(id: string) {
     const cities = await this.read();
-    const removeCities = cities.filter((city: City) => city.id !== id);
-    await this.write(removeCities);
+    const  remainingCities = cities.filter((city: City) => city.id !== id);
+    await this.write(remainingCities);
   }
 }
 
